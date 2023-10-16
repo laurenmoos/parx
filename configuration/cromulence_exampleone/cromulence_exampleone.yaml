@@ -1,0 +1,39 @@
+actions: 'cromulence_examleone_actions.yaml'
+
+ # top level Pytorch Lightning parameters
+epochs : 10
+accelerator: 'auto'
+devices: '1'
+
+# iteration parameters
+batch_size: 1
+episodes: 1
+steps: 25
+nb_optim_iters: 5
+
+ # actor critic hyperparameters
+state_dim: 7
+latent_space: 128
+recurrent: 25
+
+#this is for both the actor and the critic
+learning_rate: (3e-4, 1e-3)
+value_loss_coef: 0.5
+gamma: 0.5
+lam: 0.1
+
+# proximal policy optimization parameters
+entropy_beta: 0.01
+clip_ratio: 0.2
+
+#risk aware policy (agent policy with top-quintile performers for search)
+risk_aware: True
+k: 0.95
+
+# I am Curious: Self-Supervised Intrinsic Reward
+curious: False
+state_latent_size: 128
+policy_weight: 1
+reward_scale: 0.01
+weight: 0.2
+intrinsic_reward_integration: 0.01

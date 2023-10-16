@@ -1,0 +1,15 @@
+[{
+	"req_crc": 1946603233,
+	"valid_key": null,
+	"crc_magic1": 177334383,
+	"crc_magic2": 2114797893,
+	"return": null,
+	"command": 1
+}, {
+	"req_crc": 1946603233,
+	"valid_key": null,
+	"crc_magic1": 177334383,
+	"crc_magic2": 2114797893,
+	"return": null,
+	"command": 1
+}]

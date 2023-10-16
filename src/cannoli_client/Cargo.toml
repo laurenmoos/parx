@@ -1,0 +1,51 @@
+[package]
+name = "cannoli_client"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+aarch64 = []
+aarch64be = []
+alpha = []
+armv5teb = []
+armv5tel = []
+cris = []
+hexagon = []
+i386 = []
+i686 = []
+m68k = []
+microblaze = []
+mips = ["cannoli/mips"]
+mips64 = []
+nios2 = []
+openrisc = []
+parisc = []
+ppc = []
+ppc64 = []
+ppc64le = []
+riscv32 = []
+riscv64 = []
+s390x = []
+sh4 = []
+sparc = []
+sparc64 = []
+x86_64 = []
+xtensa = []
+
+[dependencies]
+cannoli = { path = "../cannoli/cannoli" }
+jitter = { path = "../cannoli/jitter" }
+multimap = "0.8.3"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+entropy = "0.4.1"
+
+[lib]
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "cannoli_client"
+path = "src/main.rs"
