@@ -3,7 +3,8 @@ from argparse import ArgumentParser
 from train import Navigator
 import os
 
-### entry.py kicks off the navigator. 
+
+### entry.py kicks off the navigator.
 ### Using a virtualenv run from `navigator` dir
 ### ie: python bin/entry.py
 
