@@ -3,11 +3,6 @@ from argparse import ArgumentParser
 from train import Navigator
 import os
 
-
-### entry.py kicks off the navigator.
-### Using a virtualenv run from `navigator` dir
-### ie: python bin/entry.py
-
 def create_log_directory():
     logging_dir = f"{os.getcwd()}/previous_runs//"
 

@@ -72,7 +72,7 @@ class RiskAwarePPO(pl.LightningModule):
             curious: bool,
             state_dim: int,
             latent_space: int,
-            recurrent: int ,
+            recurrent: int,
             policy_weight: float,
             reward_scale: float,
             weight: float,
@@ -91,7 +91,8 @@ class RiskAwarePPO(pl.LightningModule):
         self.actor_lr, self.critic_lr = learning_rate
 
         self.agent = ActorCritic(state_dim=state_dim, action_dim=self.action_shape,
-                                 hidden_size=latent_space, recurrent_layers=recurrent, actor_lr=self.actor_lr, critic_lr=self.critic_lr)
+                                 hidden_size=latent_space, recurrent_layers=recurrent, actor_lr=self.actor_lr,
+                                 critic_lr=self.critic_lr)
 
         self.gamma = gamma
         self.lam = lam
@@ -130,7 +131,7 @@ class RiskAwarePPO(pl.LightningModule):
 
         self.state = self.env.reset()
 
-        self.td =  TDigest()
+        self.td = TDigest()
 
     def forward(self, x: torch.Tensor):
         pi, action = self.agent.actor(x)
@@ -158,13 +159,12 @@ class RiskAwarePPO(pl.LightningModule):
 
     def train_batch(self) -> tuple:
         for episode_idx in range(self.episodes):
-            print(f"Episode id {episode_idx}")
             for step in range(self.steps_per_episode):
                 pi, action, log_prob, value = self.agent(self.state)
 
                 assert action.shape[0] == self.steps_per_episode
 
-                #for the action of the current step, take the indexed action from the action space
+                # for the action of the current step, take the indexed action from the action space
 
                 next_state, reward, done, _ = self.env.step(self.action_space[action[step]])
 
@@ -172,7 +172,6 @@ class RiskAwarePPO(pl.LightningModule):
 
                 self.episode_step += 1
 
-                # TODO do step through on real dataset to make sure the recurrence stuff makes sense
                 self.batch.update_experience(state=self.state[step, :], next_state=next_state[step, :],
                                              action=action[step],
                                              logp=log_prob[step])
@@ -183,19 +182,17 @@ class RiskAwarePPO(pl.LightningModule):
                 terminal = len(self.episode.rewards) == self.steps_per_episode
 
                 if done or terminal:
-                    #TODO: episode states should be equivalent to the final observation space, assertion
                     qvals, adv = self._compute_episode_reward(self.episode.rewards, self.episode.values)
 
                     sum_episode_rewards = sum(self.episode.rewards)
                     self.epoch_rewards.append(sum_episode_rewards)
 
-
                     self.td.update(sum_episode_rewards)
                     top_quintile = self.td.percentile(self.k)
                     if sum_episode_rewards >= top_quintile:
-                        filename =  f'reproducibility_criteria/epoch:{self.current_epoch}.csv'
+                        filename = f'reproducibility_criteria/epoch:{self.current_epoch}.csv'
                         file_exists = os.path.isfile(filename)
-                        
+
                         # Open the file in the appropriate mode
                         mode = 'a' if file_exists else 'w'
                         with open(filename, mode) as csvfile:
@@ -209,11 +206,12 @@ class RiskAwarePPO(pl.LightningModule):
                                 crc_magic1 = int(state[2])
                                 crc_magic2 = int(state[3])
                                 ret = int(state[4])
-                                command  = int(state[5])
+                                command = int(state[5])
                                 invariant = int(state[6])
                                 human_read_states.append({"req_crc": req_crc, "valid_key": valid_key,
-                                                          "crc_magic1": crc_magic1, "crc_magic2": crc_magic2, "ret": ret,
-                                     "command": command, "invariant": invariant})
+                                                          "crc_magic1": crc_magic1, "crc_magic2": crc_magic2,
+                                                          "ret": ret,
+                                                          "command": command, "invariant": invariant})
 
                             reproducibility_criteria.writerow(human_read_states)
 
@@ -222,13 +220,11 @@ class RiskAwarePPO(pl.LightningModule):
                     self.episode_step = 0
                     self.state = self.env.reset()
 
-                    # TODO; this can be cleaned up, encapsulated
                     yield torch.stack(self.batch.states), torch.stack(self.batch.next_states), torch.stack(
                         self.batch.actions), \
                         torch.stack(self.batch.logp), adv[-1], qvals[-1]
 
                     self.batch.reset()
-                    # TODO: add assertion about batch state
 
             self.avg_ep_reward = sum(self.epoch_rewards) / self.steps_per_episode
 
@@ -270,9 +266,6 @@ class RiskAwarePPO(pl.LightningModule):
 
         self.log("avg_ep_reward", self.avg_ep_reward, prog_bar=True, on_step=False, on_epoch=True)
 
-
-
-
         if not self.optimizer_step:
 
             loss_actor = self.actor_loss(state, action, old_logp, adv)
@@ -299,8 +292,6 @@ class RiskAwarePPO(pl.LightningModule):
         # this is the PPO bit - i.e. pessimistic update of policy minimizing amount of entropy epoch over epoch
         clip_adv = torch.clamp(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio) * adv
         loss_actor = -(torch.min(ratio * adv, clip_adv)).mean()
-
-        # TODO: might be nice to do assertions about pi
 
         return loss_actor
 
